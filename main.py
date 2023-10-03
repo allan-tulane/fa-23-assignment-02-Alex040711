@@ -46,9 +46,35 @@ def pad(x,y):
 
 
 def subquadratic_multiply(x, y):
-    ### TODO
-    pass
-    ###
+    # Convert to BinaryNumber if they aren't already
+    if not isinstance(x, BinaryNumber):
+        x = BinaryNumber(x)
+    if not isinstance(y, BinaryNumber):
+        y = BinaryNumber(y)
+    
+    # Get the binary vectors of x and y and pad them if necessary
+    x_vec, y_vec = pad(x.binary_vec, y.binary_vec)
+    
+    # Base case: If they are single bits, just multiply
+    if len(x_vec) == 1 or len(y_vec) == 1:
+        return binary2int([str(int(x_vec[0]) * int(y_vec[0]))])
+
+    # Split the numbers
+    a, b = split_number(x_vec)
+    c, d = split_number(y_vec)
+    
+    # Recursive calls
+    ac = subquadratic_multiply(a, c)
+    bd = subquadratic_multiply(b, d)
+    ab_cd = subquadratic_multiply(binary2int(a.binary_vec + b.binary_vec), binary2int(c.binary_vec + d.binary_vec))
+    
+    # Compute (a+b)(c+d) - ac - bd
+    middle_term = binary2int([str(int(bit) - ac.binary_vec[i] - bd.binary_vec[i]) for i, bit in enumerate(ab_cd.binary_vec)])
+    
+    # Combine results using the formula
+    result = binary2int([str(bit) for bit in ac.binary_vec + ['0'] * (len(x_vec))] + [str(bit) for bit in middle_term.binary_vec + ['0'] * (len(x_vec) // 2)] + bd.binary_vec)
+    
+    return result
 
 
 
